@@ -15,7 +15,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("To do"), centerTitle: true),
+      appBar: AppBar(
+        titleSpacing: 20,
+        toolbarHeight: 80,
+        title: Text(
+          selectedIndex == 0 ? "Todos" : "Stats",
+          style: TextStyle(fontSize: 52, fontWeight: FontWeight.w500),
+        ),
+      ),
 
       bottomNavigationBar: NavigationBar(
         destinations: [
@@ -30,12 +37,19 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
 
+      floatingActionButton: selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {},
+              shape: CircleBorder(),
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              child: Icon(Icons.add),
+            )
+          : null,
+
       body: IndexedStack(
         index: selectedIndex,
-        children: [
-          TodoScreen(),
-          StatsScreen()
-        ],
+        children: [TodoScreen(), StatsScreen()],
       ),
     );
   }
