@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_app/screens/add_screen.dart';
 import 'package:flutter_todo_app/screens/stats_screen.dart';
 import 'package:flutter_todo_app/screens/todo_screen.dart';
 
@@ -39,7 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
       floatingActionButton: selectedIndex == 0
           ? FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddScreen(),
+                  ),
+                );
+              },
               shape: CircleBorder(),
               backgroundColor: Colors.blueAccent,
               foregroundColor: Colors.white,

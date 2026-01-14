@@ -16,32 +16,13 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   void initState() {
     super.initState();
-    database = AppDatabase();
-    _initializeData();
+    database = AppDatabase.instance;
   }
 
   @override
   void dispose() {
     database.close();
     super.dispose();
-  }
-
-  Future<void> _initializeData() async {
-    final existing = await database.getAllTodos();
-    if (existing.isEmpty) {
-      await database.addTodo(
-        title: "Pay electricity bill",
-        priority: TodoPriority.high,
-      );
-      await database.addTodo(
-        title: "Buy groceries",
-        description: "Milk, bread",
-        priority: TodoPriority.medium,
-      );
-      await database.addTodo(title: "Fold the laundry");
-      await database.addTodo(title: "Clean the room");
-      await database.addTodo(title: "Do the dishes");
-    }
   }
 
   @override

@@ -18,7 +18,9 @@ class TodoItems extends Table {
 
 @DriftDatabase(tables: [TodoItems])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase._internal() : super(_openConnection());
+
+  static final AppDatabase instance = AppDatabase._internal();
 
   @override
   int get schemaVersion => 1;
