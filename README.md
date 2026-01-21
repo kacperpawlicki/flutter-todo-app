@@ -12,7 +12,6 @@ This is my first Flutter project, created for learning purposes.
 
 ### Planned
 - User statistics
-- Sorting todos by priority
 - Options to delete and update todos
 - UI improvements
 
