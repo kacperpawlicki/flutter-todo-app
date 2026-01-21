@@ -7,13 +7,18 @@ This is my first Flutter project, created for learning purposes.
 ### Current features
 - Basic UI
 - Local database using **Drift**
+- Sorting todos by priority
+- Adding new todos
 
 ### Planned
 - User statistics
 - Sorting todos by priority
-- Options to add, delete and update todos
+- Options to delete and update todos
 - UI improvements
 
-### Screenshot
-<img src="screenshots/todo_list_screen.png" width="300" />
+### Screenshots
+<p align="center">
+    <img src="screenshots/todo_list_screen.png" width="300" />
+    <img src="screenshots/add_screen.png" width="300" />
+</p>
 

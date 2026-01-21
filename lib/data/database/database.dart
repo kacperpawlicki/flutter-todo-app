@@ -27,7 +27,25 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<TodoListItem>> getAllTodos() => select(todoItems).get();
 
-  Stream<List<TodoListItem>> watchAllTodos() => select(todoItems).watch();
+  Stream<List<TodoListItem>> watchActiveTodos() {
+    return (select(todoItems)
+      ..where((t) => t.isChecked.equals(false))
+      ..orderBy([
+            (t) => OrderingTerm(expression: t.priority, mode: OrderingMode.desc),
+            (t) => OrderingTerm(expression: t.id, mode: OrderingMode.asc),
+      ]))
+        .watch();
+  }
+
+  Stream<List<TodoListItem>> watchCompletedTodos() {
+    return (select(todoItems)
+      ..where((t) => t.isChecked.equals(true))
+      ..orderBy([
+            (t) => OrderingTerm(expression: t.priority, mode: OrderingMode.desc),
+            (t) => OrderingTerm(expression: t.id, mode: OrderingMode.asc),
+      ]))
+        .watch();
+  }
 
   Future<int> addTodo({
     required String title,

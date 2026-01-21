@@ -30,111 +30,133 @@ class _TodoScreenState extends State<TodoScreen> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: StreamBuilder<List<TodoListItem>>(
-        stream: database.watchAllTodos(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        stream: database.watchActiveTodos(),
+        builder: (context, activeSnapshot) {
+          return StreamBuilder<List<TodoListItem>>(
+            stream: database.watchCompletedTodos(),
+            builder: (context, completedSnapshot) {
+              if (!activeSnapshot.hasData || !completedSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          final todos = snapshot.data!;
+              final activeTodos = activeSnapshot.data!;
+              final completedTodos = completedSnapshot.data!;
 
-          if (todos.isEmpty) {
-            return const Center(
-              child: Text('No todos yet. Add one!'),
-            );
-          }
+              if (activeTodos.isEmpty && completedTodos.isEmpty) {
+                return const Center(
+                  child: Text('No todos yet. Add one!'),
+                );
+              }
 
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
+              return ListView(
+                children: [
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12.0),
-                color: const Color.fromARGB(255, 66, 73, 77),
-                child: InkWell(
-                  onTap: () async {
-                    final updated = todo.copyWith(isChecked: !todo.isChecked);
-                    await database.updateTodo(updated);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                todo.title,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Checkbox(
-                              activeColor: Colors.blueAccent,
-                              checkColor: Colors.white,
-                              value: todo.isChecked,
-                              onChanged: (value) async {
-                                final updated = todo.copyWith(
-                                  isChecked: value ?? false,
-                                );
-                                await database.updateTodo(updated);
-                              },
-                            ),
-                          ],
-                        ),
-                        if (todo.description != null || todo.priorityEnum != null) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (todo.description != null &&
-                                  todo.description!.isNotEmpty)
-                                Expanded(
-                                  child: Text(
-                                    todo.description!,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              if (todo.priorityEnum != null)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: todo.priorityEnum!.color,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      todo.priorityEnum!.label,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ],
+                  ...activeTodos.map((todo) => _buildTodoCard(todo, false)),
+
+                  if (completedTodos.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Divider(),
                     ),
-                  ),
-                ),
+
+                    ...completedTodos.map((todo) => _buildTodoCard(todo, true)),
+                  ],
+                ],
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildTodoCard(TodoListItem todo, bool isCompleted) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      color: isCompleted
+          ? const Color.fromARGB(255, 66, 73, 77).withOpacity(0.5)
+          : const Color.fromARGB(255, 66, 73, 77),
+      child: InkWell(
+        onTap: () async {
+          final updated = todo.copyWith(isChecked: !todo.isChecked);
+          await database.updateTodo(updated);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      todo.title,
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        decoration: isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                  ),
+                  Checkbox(
+                    activeColor: Colors.blueAccent,
+                    checkColor: Colors.white,
+                    value: todo.isChecked,
+                    onChanged: (value) async {
+                      final updated = todo.copyWith(
+                        isChecked: value ?? false,
+                      );
+                      await database.updateTodo(updated);
+                    },
+                  ),
+                ],
+              ),
+              if (todo.description != null || todo.priorityEnum != null) ...[
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (todo.description != null &&
+                        todo.description!.isNotEmpty)
+                      Expanded(
+                        child: Text(
+                          todo.description!,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    if (todo.priorityEnum != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: todo.priorityEnum!.color,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            todo.priorityEnum!.label,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
